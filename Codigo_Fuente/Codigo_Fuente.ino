@@ -9,6 +9,7 @@
 #include <SPI.h>
 #include <Fonts\Stark_Italic7pt7b.h>
 #include <PWM.h>
+#include <ezButton.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //      |NOTAS|
@@ -61,15 +62,49 @@ int duraciones[] = {    // array con la duracion de cada nota
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//      |VARIABLES GRAFICADORAS|
+//      |PULSADORES|
 ////////////////////////////////////////////////////////////////////////////////////////
 
-int RawValue = 0;
-int LastPercent = 0;
-int RawValue1 = 0;
-int LastPercent1 = 0;
-int RawValue2 = 0;
-int LastPercent2 = 0;
+int pagina = 0;
+
+const int SHORT_PRESS_TIME  = 1000; // 1000 milliseconds
+const int LONG_PRESS_TIME   = 1000; // 1000 milliseconds
+const int LONG_PRESS_TIME2   = 2000; // 1000 milliseconds
+
+int lastState = LOW;  // the previous state from the input pin
+int currentState;     // the current reading from the input pin
+unsigned long pressedTime  = 0;
+unsigned long releasedTime = 0;
+bool isPressing = false;
+bool isLongDetected = false;
+
+const int SHORT_PRESS_TIME1  = 1000; // 1000 milliseconds
+const int LONG_PRESS_TIME1   = 1000; // 1000 milliseconds
+
+int lastState1 = LOW;  // the previous state from the input pin
+int currentState1;     // the current reading from the input pin
+unsigned long pressedTime1  = 0;
+unsigned long releasedTime1 = 0;
+bool isPressing1 = false;
+bool isLongDetected1 = false;
+
+int lastState2 = LOW;  // the previous state from the input pin
+int currentState2;     // the current reading from the input pin
+unsigned long pressedTime2  = 0;
+unsigned long releasedTime2 = 0;
+bool isPressing2 = false;
+bool isLongDetected2 = false;
+
+int lastState3 = LOW;  // the previous state from the input pin
+int currentState3;     // the current reading from the input pin
+unsigned long pressedTime3  = 0;
+unsigned long releasedTime3 = 0;
+bool isPressing3 = false;
+bool isLongDetected3 = false;
+
+////////////////////////////////////////////////////////////////////////////////////////
+//      |VARIABLES GRAFICADORAS|
+////////////////////////////////////////////////////////////////////////////////////////
 
 int graficoMax = 83;
 int grafico1 = 0;
@@ -80,7 +115,6 @@ int grafico2 = 0;
 ////////////////////////////////////////////////////////////////////////////////////////
 
 float V5 = 5; //voltaje entre 5v y gnd con cable violeta de la fuente aliemntando el arduino
-int pagina = 0;
 
 float voltaje = 0.0;
 float Idc = 0.0;
@@ -92,6 +126,8 @@ float sens;
 int frecuencia  = 1;
 int duty = 1;
 int dutyPag = 1;
+bool paginaPWM = false;
+bool pulCL = false;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //      |FUNCIONES GENERALES|
@@ -118,11 +154,10 @@ void setup() {
 void loop() {
 
   logo();
-  pulsadores();
   temperatura();
-  
 
   if(pagina != 4){
+  pulsadores();
   corrienteCalculo();
   voltajeFunction();
   potenciaFunction();
@@ -130,10 +165,12 @@ void loop() {
   graficoA();
   graficoP();
   recuadrosWT();
+  }else if(pagina == 4 && paginaPWM == true){
+  PWM();
   }else{
   PWM();
+  pulsadores();
   }
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -196,7 +233,77 @@ void temperatura() {
   }
 
 void pulsadores() {
-    if(digitalRead(PULSADOR1) == LOW){     // si se ha presionado el pulsador
+
+  currentState = digitalRead(PULSADOR1);
+
+  if(lastState == HIGH && currentState == LOW) {        // button is pressed
+    pressedTime = millis();
+    isPressing = true;
+    isLongDetected = false;
+   
+  } else if(lastState == LOW && currentState == HIGH) { // button is released
+    isPressing = false;
+    releasedTime = millis();
+
+    long pressDuration = releasedTime - pressedTime;
+
+    if( pressDuration < SHORT_PRESS_TIME )
+      pagina++;
+      if(pagina > 4)  pagina = 0;
+      if(pagina == 4 || pagina == 0)  tft.fillScreen(ST7735_BLACK);
+  }
+
+  if(isPressing == true && isLongDetected == false) {
+    long pressDuration = millis() - pressedTime;
+
+    if( isPressing == true && isPressing1 == true ){
+    long pressDuration = millis() - pressedTime;
+    if( pressDuration > LONG_PRESS_TIME ) paginaPWM = true;
+  }
+
+    if( pressDuration > LONG_PRESS_TIME2 ) {
+      pagina++;
+      if(pagina > 4)  pagina = 0;
+      if(pagina == 4 || pagina == 0)  tft.fillScreen(ST7735_BLACK);
+    }
+  }
+  
+  lastState = currentState;
+
+  currentState1 = digitalRead(PULSADOR2);
+
+  if(lastState1 == HIGH && currentState1 == LOW) {        // button is pressed
+    pressedTime1 = millis();
+    isPressing1 = true;
+    isLongDetected1 = false;
+    
+  } else if(lastState1 == LOW && currentState1 == HIGH) { // button is released
+    isPressing1 = false;
+    releasedTime1 = millis();
+
+    long pressDuration1 = releasedTime1 - pressedTime1;
+
+    if( pressDuration1 < SHORT_PRESS_TIME1 )
+      pagina--;
+      if(pagina < 0)  pagina=4;
+      if(pagina == 4 || pagina == 3)  tft.fillScreen(ST7735_BLACK);
+    }
+
+  if(isPressing1 == true && isLongDetected1 == false) {
+    long pressDuration1 = millis() - pressedTime1;
+
+    if( pressDuration1 > LONG_PRESS_TIME2 ) {
+      pagina--;
+      if(pagina < 0)  pagina=4;
+      if(pagina == 4 || pagina == 3)  tft.fillScreen(ST7735_BLACK);
+    }
+  }
+
+  lastState1 = currentState1;
+
+    /*    
+
+     if(digitalRead(PULSADOR1) == LOW){     // si se ha presionado el pulsador
       for (int i = 0; i < 1; i++) {     // bucle repite 1 veces
       int duracion = 1000 / duraciones[i];    // duracion de la nota en milisegundos
       tone(BUZZER_PASIVO, NOTE_C7, duracion);  // ejecuta el tono con la duracion
@@ -236,7 +343,10 @@ void pulsadores() {
       }
     }
   }
-
+  
+  
+  */
+  
 }
 
 void recuadrosWT() {
@@ -418,6 +528,77 @@ void PWM() {
   pwmWrite(mosfetPWM, duty);
   duty = (255 / 100) * dutyPag;
 
+
+
+/*
+  if(paginaPWM == true && pagina == 4){
+
+  currentState2 = digitalRead(PULSADOR1);
+
+  if(lastState2 == HIGH && currentState2 == LOW) {        // button is pressed
+    pressedTime2 = millis();
+    isPressing2 = true;
+    isLongDetected2 = false;
+   
+  } else if(lastState2 == LOW && currentState2 == HIGH) { // button is released
+    isPressing2 = false;
+    releasedTime2 = millis();
+
+    long pressDuration2 = releasedTime2 - pressedTime2;
+
+    if( pressDuration2 < SHORT_PRESS_TIME )
+      pagina++;
+      if(pagina > 4)  pagina = 0;
+      if(pagina == 4 || pagina == 0)  tft.fillScreen(ST7735_BLACK);
+  }
+
+  if(isPressing2 == true && isLongDetected2 == false) {
+    long pressDuration2 = millis() - pressedTime2;
+
+    if( pressDuration2 > LONG_PRESS_TIME ) {
+      pagina++;
+      if(pagina > 4)  pagina = 0;
+      if(pagina == 4 || pagina == 0)  tft.fillScreen(ST7735_BLACK);
+    }
+  }
+  
+  lastState2 = currentState2;
+
+  currentState3 = digitalRead(PULSADOR2);
+
+  if(lastState3 == HIGH && currentState3 == LOW) {        // button is pressed
+    pressedTime3 = millis();
+    isPressing3 = true;
+    isLongDetected3 = false;
+    
+  } else if(lastState3 == LOW && currentState3 == HIGH) { // button is released
+    isPressing3 = false;
+    releasedTime3 = millis();
+
+    long pressDuration3 = releasedTime3 - pressedTime3;
+
+    if( pressDuration3 < SHORT_PRESS_TIME1 )
+      pagina--;
+      if(pagina < 0)  pagina=4;
+      if(pagina == 4 || pagina == 3)  tft.fillScreen(ST7735_BLACK);
+    }
+
+  if(isPressing3 == true && isLongDetected3 == false) {
+    long pressDuration3 = millis() - pressedTime3;
+
+    if( pressDuration3 > LONG_PRESS_TIME2 ) {
+      pagina--;
+      if(pagina < 0)  pagina=4;
+      if(pagina == 4 || pagina == 3)  tft.fillScreen(ST7735_BLACK);
+    }
+  }
+
+  lastState3 = currentState3;
+    
+  }
+
+*/
+
   tft.setRotation(1);
   tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
   tft.setTextWrap(true);
@@ -427,32 +608,34 @@ void PWM() {
   tft.setCursor(10, 10);
   tft.println("PWM");
 
-  tft.setCursor(75, 10);  // posicion (x,y)
+  tft.setCursor(70, 10);  // posicion (x,y)
   tft.println("V:");
     
   char string[10];
-  tft.setCursor(105, 10);  // posicion (x,y)
+  tft.setCursor(100, 10);  // posicion (x,y)
   dtostrf(voltajefinal, 2, 4, string); //declara como string el valor en memoria de char
-  tft.println(voltajefinal, (vdecimal-1)); // imprime texto o valor
+  tft.println(voltajefinal, vdecimal-1); // imprime texto o valor
 
-  tft.setCursor(75, 45);  // posicion (x,y)
+  tft.setCursor(70, 45);  // posicion (x,y)
   tft.println("F:");
 
   char string1[10];
-  tft.setCursor(105, 45);  // posicion (x,y)
+  tft.setCursor(100, 45);  // posicion (x,y)
   dtostrf(frecuencia, 2, 4, string1); //declara como string el valor en memoria de char
   tft.println(frecuencia); // imprime texto o valor
 
-  tft.setCursor(75, 80);  // posicion (x,y)
+  tft.setCursor(70, 80);  // posicion (x,y)
   tft.println("D:");
 
   char string2[10];
-  tft.setCursor(105, 80);  // posicion (x,y)
+  tft.setCursor(100, 80);  // posicion (x,y)
   dtostrf(dutyPag, 2, 4, string2); //declara como string el valor en memoria de char
   tft.println(dutyPag); // imprime texto o valor
 
-  tft.setCursor(140, 80);  // posicion (x,y)
+  tft.setCursor(135, 80);  // posicion (x,y)
   tft.println("%");
+
+  /*
 
   for(int i = 1; i <= 5; i++) {
 
@@ -463,16 +646,23 @@ void PWM() {
   tft.drawRect(10 * i, 85, 11, 11, ST7735_WHITE);
 
   }
+  
+  */
 
-  int dLine = 50 - (30 / 30);
+  int dLine =  20 + (0.3 * dutyPag);
 
   tft.drawLine(10, 85, 20, 85, ST7735_GREEN);
   tft.drawLine(50, 85, 60, 85, ST7735_GREEN);
   tft.drawLine(20, 85, 20, 55, ST7735_GREEN);
   
-  tft.drawLine(20, 85, dLine, 85, ST7735_GREEN);
-  tft.drawLine(dLine+30, 55, dLine+30, 85, ST7735_GREEN);
-  tft.drawLine(50, 55, dLine, 55, ST7735_GREEN);
+  tft.drawLine(20, 55, dLine, 55, ST7735_GREEN);
+  tft.drawLine(dLine, 55, dLine, 85, ST7735_GREEN);
+  tft.drawLine(dLine, 85, 50, 85, ST7735_GREEN);
+  
+  tft.setTextSize(1);
+
+  tft.setCursor(148, 52);  // posicion (x,y)
+  tft.println("Hz");
 
   
 
@@ -507,7 +697,7 @@ void voltajeFunction(){
   }else if(pagina == 2){
     vvca = A3;
     voltajefinal = (voltaje / 0.3190); //(voltaje) / (R2 / (R2 + R1)) salida de 12
-  }else if(pagina == 3){
+  }else if(pagina == 3 || pagina == 4){
     vvca = A4;
     voltajefinal = (voltaje / 0.09082); //(voltaje) / (R2 / (R2 + R1)) salida regulable
   }
