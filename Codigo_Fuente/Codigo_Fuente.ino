@@ -1,4 +1,3 @@
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //      |LIBRERIAS|
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -87,7 +86,26 @@ unsigned long releasedTime1 = 0;
 bool isPressing1 = false;
 bool isLongDetected1 = false;
 
+////////////////////////////////////////////////////////////////
 
+int lastState2 = LOW;  // the previous state from the input pin
+int currentState2;     // the current reading from the input pin
+unsigned long pressedTime2  = 0;
+unsigned long releasedTime2 = 0;
+bool isPressing2 = false;
+bool isLongDetected2 = false;
+
+////////////////////////////////////////////////////////////////
+
+int lastState3 = LOW;  // the previous state from the input pin
+int currentState3;     // the current reading from the input pin
+unsigned long pressedTime3  = 0;
+unsigned long releasedTime3 = 0;
+bool isPressing3 = false;
+bool isLongDetected3 = false;
+
+bool btBool1 = false;
+bool btBool2 = false;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //      |VARIABLES GRAFICADORAS|
@@ -110,6 +128,7 @@ float voltajefinal = 0.0;
 int vdecimal = 0;
 float iva;
 float sens;
+
 int frecuencia  = 1;
 int duty = 1;
 int dutyPag = 1;
@@ -217,6 +236,79 @@ void temperatura() {
 void pulsadores() {
 
   currentState1 = digitalRead(PULSADOR1);
+  currentState = digitalRead(PULSADOR2);
+
+  if(btBool1 == true && btBool2 == true){
+
+    if(lastState2 == HIGH && currentState2 == LOW) {        // button is pressed
+    pressedTime2 = millis();
+    isPressing2 = true;
+    isLongDetected2 = false;
+  } else if(lastState2 == LOW && currentState2 == HIGH) { // button is released
+    isPressing2 = false;
+    releasedTime2 = millis();
+
+    long pressDuration2 = releasedTime2 - pressedTime2;
+
+    if( pressDuration2 < SHORT_PRESS_TIME )
+      Serial.println("A short press is detected");
+      frecuencia++;
+      if(frecuencia > 99) {frecuencia = 1;}
+  }
+
+  if(isPressing2 == true) {
+    long pressDuration2 = millis() - pressedTime2;
+
+    if( pressDuration2 > MID_PRESS_TIME &&  pressDuration2 < LONG_PRESS_TIME && pagina == 4 ){
+      Serial.println("A Mid press is detected");
+      btBool1 = false;
+    }
+    
+    if( pressDuration2 > LONG_PRESS_TIME ){
+      Serial.println("A long press is detected");
+      frecuencia++;
+      if(frecuencia > 99) {frecuencia = 1;}
+    }
+  }
+
+  lastState2 = currentState2;
+
+  ////////////////////////////////////////////////////////////////////////
+
+  if(lastState3 == HIGH && currentState3 == LOW) {        // button is pressed
+    pressedTime3 = millis();
+    isPressing3 = true;
+    isLongDetected3 = false;
+  } else if(lastState3 == LOW && currentState3 == HIGH) { // button is released
+    isPressing3 = false;
+    releasedTime3 = millis();
+
+    long pressDuration3 = releasedTime3 - pressedTime3;
+
+    if( pressDuration3 < SHORT_PRESS_TIME )
+      Serial.println("A short press is detected");
+      frecuencia--;
+      if(frecuencia < 1) {frecuencia = 99;}
+  }
+
+  if(isPressing3 == true) {
+    long pressDuration3 = millis() - pressedTime3;
+
+    if( pressDuration3 > MID_PRESS_TIME &&  pressDuration3 < LONG_PRESS_TIME){
+      Serial.println("A Mid press is detected");
+      btBool2 = false;
+    }
+
+    if( pressDuration3 > LONG_PRESS_TIME ){
+      Serial.println("A long press is detected");
+      frecuencia--;
+      if(frecuencia < 1) {frecuencia = 99;}
+    }
+  }
+
+  lastState3 = currentState3;
+
+  }else{
 
   if(lastState1 == HIGH && currentState1 == LOW) {        // button is pressed
     pressedTime1 = millis();
@@ -238,6 +330,11 @@ void pulsadores() {
 
   if(isPressing1 == true) {
     long pressDuration1 = millis() - pressedTime1;
+
+    if( pressDuration1 > MID_PRESS_TIME &&  pressDuration1 < LONG_PRESS_TIME && pagina == 4 ){
+      Serial.println("A Mid press is detected");
+      btBool1 = true;
+    }
     
     if( pressDuration1 > LONG_PRESS_TIME ){
       Serial.println("A long press is detected");
@@ -273,9 +370,14 @@ void pulsadores() {
   }
 
   if(isPressing == true) {
-    long pressDuration = millis() - pressedTime;
+    long pressDuration1 = millis() - pressedTime;
 
-    if( pressDuration > LONG_PRESS_TIME ){
+    if( pressDuration1 > MID_PRESS_TIME &&  pressDuration1 < LONG_PRESS_TIME){
+      Serial.println("A Mid press is detected");
+      btBool2 = true;
+    }
+
+    if( pressDuration1 > LONG_PRESS_TIME ){
       Serial.println("A long press is detected");
       pagina--;
       tft.fillScreen(ST7735_BLACK);
@@ -285,7 +387,8 @@ void pulsadores() {
   }
 
   lastState = currentState;
-  
+
+  }
 }
 
 void recuadrosWT() {
