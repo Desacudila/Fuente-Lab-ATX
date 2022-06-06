@@ -68,8 +68,8 @@ int duraciones[] = {    // array con la duracion de cada nota
 int pagina = 0;
 
 const int SHORT_PRESS_TIME  = 1000; // 1000 milliseconds
-const int LONG_PRESS_TIME   = 1000; // 1000 milliseconds
-const int LONG_PRESS_TIME2   = 2000; // 1000 milliseconds
+const int MID_PRESS_TIME  = 1000;
+const int LONG_PRESS_TIME   = 2000; // 1000 milliseconds
 
 int lastState = LOW;  // the previous state from the input pin
 int currentState;     // the current reading from the input pin
@@ -78,8 +78,7 @@ unsigned long releasedTime = 0;
 bool isPressing = false;
 bool isLongDetected = false;
 
-const int SHORT_PRESS_TIME1  = 1000; // 1000 milliseconds
-const int LONG_PRESS_TIME1   = 1000; // 1000 milliseconds
+////////////////////////////////////////////////////////////////
 
 int lastState1 = LOW;  // the previous state from the input pin
 int currentState1;     // the current reading from the input pin
@@ -88,19 +87,7 @@ unsigned long releasedTime1 = 0;
 bool isPressing1 = false;
 bool isLongDetected1 = false;
 
-int lastState2 = LOW;  // the previous state from the input pin
-int currentState2;     // the current reading from the input pin
-unsigned long pressedTime2  = 0;
-unsigned long releasedTime2 = 0;
-bool isPressing2 = false;
-bool isLongDetected2 = false;
 
-int lastState3 = LOW;  // the previous state from the input pin
-int currentState3;     // the current reading from the input pin
-unsigned long pressedTime3  = 0;
-unsigned long releasedTime3 = 0;
-bool isPressing3 = false;
-bool isLongDetected3 = false;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //      |VARIABLES GRAFICADORAS|
@@ -126,8 +113,6 @@ float sens;
 int frecuencia  = 1;
 int duty = 1;
 int dutyPag = 1;
-bool paginaPWM = false;
-bool pulCL = false;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //      |FUNCIONES GENERALES|
@@ -155,9 +140,9 @@ void loop() {
 
   logo();
   temperatura();
+  pulsadores();
 
   if(pagina != 4){
-  pulsadores();
   corrienteCalculo();
   voltajeFunction();
   potenciaFunction();
@@ -165,11 +150,8 @@ void loop() {
   graficoA();
   graficoP();
   recuadrosWT();
-  }else if(pagina == 4 && paginaPWM == true){
-  PWM();
   }else{
   PWM();
-  pulsadores();
   }
 }
 
@@ -234,13 +216,48 @@ void temperatura() {
 
 void pulsadores() {
 
-  currentState = digitalRead(PULSADOR1);
+  currentState1 = digitalRead(PULSADOR1);
+
+  if(lastState1 == HIGH && currentState1 == LOW) {        // button is pressed
+    pressedTime1 = millis();
+    isPressing1 = true;
+    isLongDetected1 = false;
+  } else if(lastState1 == LOW && currentState1 == HIGH) { // button is released
+    isPressing1 = false;
+    releasedTime1 = millis();
+
+    long pressDuration1 = releasedTime1 - pressedTime1;
+
+    if( pressDuration1 < SHORT_PRESS_TIME )
+      Serial.println("A short press is detected");
+      pagina++;
+      tft.fillScreen(ST7735_BLACK);
+      if(pagina > 4)pagina  = 0;
+      //if(pagina == 4 || pagina == 0)  tft.fillScreen(ST7735_BLACK);
+  }
+
+  if(isPressing1 == true) {
+    long pressDuration1 = millis() - pressedTime1;
+    
+    if( pressDuration1 > LONG_PRESS_TIME ){
+      Serial.println("A long press is detected");
+      pagina++;
+      tft.fillScreen(ST7735_BLACK);
+      if(pagina > 4)  pagina=0;
+      //if(pagina == 4 || pagina == 0)  tft.fillScreen(ST7735_BLACK);
+    }
+  }
+
+  lastState1 = currentState1;
+
+  ////////////////////////////////////////////////////////////////////////
+
+  currentState = digitalRead(PULSADOR2);
 
   if(lastState == HIGH && currentState == LOW) {        // button is pressed
     pressedTime = millis();
     isPressing = true;
     isLongDetected = false;
-   
   } else if(lastState == LOW && currentState == HIGH) { // button is released
     isPressing = false;
     releasedTime = millis();
@@ -248,104 +265,26 @@ void pulsadores() {
     long pressDuration = releasedTime - pressedTime;
 
     if( pressDuration < SHORT_PRESS_TIME )
-      pagina++;
-      if(pagina > 4)  pagina = 0;
-      if(pagina == 4 || pagina == 0)  tft.fillScreen(ST7735_BLACK);
+      Serial.println("A short press is detected");
+      pagina--;
+      tft.fillScreen(ST7735_BLACK);
+      if(pagina < 0)  pagina=4;
+      //if(pagina == 4 || pagina == 3)  tft.fillScreen(ST7735_BLACK);
   }
 
-  if(isPressing == true && isLongDetected == false) {
+  if(isPressing == true) {
     long pressDuration = millis() - pressedTime;
 
-    if( isPressing == true && isPressing1 == true ){
-    long pressDuration = millis() - pressedTime;
-    if( pressDuration > LONG_PRESS_TIME ) paginaPWM = true;
-  }
-
-    if( pressDuration > LONG_PRESS_TIME2 ) {
-      pagina++;
-      if(pagina > 4)  pagina = 0;
-      if(pagina == 4 || pagina == 0)  tft.fillScreen(ST7735_BLACK);
+    if( pressDuration > LONG_PRESS_TIME ){
+      Serial.println("A long press is detected");
+      pagina--;
+      tft.fillScreen(ST7735_BLACK);
+      if(pagina < 0)  pagina=4;
+      //if(pagina == 4 || pagina == 3)tft.fillScreen(ST7735_BLACK);
     }
   }
-  
+
   lastState = currentState;
-
-  currentState1 = digitalRead(PULSADOR2);
-
-  if(lastState1 == HIGH && currentState1 == LOW) {        // button is pressed
-    pressedTime1 = millis();
-    isPressing1 = true;
-    isLongDetected1 = false;
-    
-  } else if(lastState1 == LOW && currentState1 == HIGH) { // button is released
-    isPressing1 = false;
-    releasedTime1 = millis();
-
-    long pressDuration1 = releasedTime1 - pressedTime1;
-
-    if( pressDuration1 < SHORT_PRESS_TIME1 )
-      pagina--;
-      if(pagina < 0)  pagina=4;
-      if(pagina == 4 || pagina == 3)  tft.fillScreen(ST7735_BLACK);
-    }
-
-  if(isPressing1 == true && isLongDetected1 == false) {
-    long pressDuration1 = millis() - pressedTime1;
-
-    if( pressDuration1 > LONG_PRESS_TIME2 ) {
-      pagina--;
-      if(pagina < 0)  pagina=4;
-      if(pagina == 4 || pagina == 3)  tft.fillScreen(ST7735_BLACK);
-    }
-  }
-
-  lastState1 = currentState1;
-
-    /*    
-
-     if(digitalRead(PULSADOR1) == LOW){     // si se ha presionado el pulsador
-      for (int i = 0; i < 1; i++) {     // bucle repite 1 veces
-      int duracion = 1000 / duraciones[i];    // duracion de la nota en milisegundos
-      tone(BUZZER_PASIVO, NOTE_C7, duracion);  // ejecuta el tono con la duracion
-      int pausa = duracion * 1.30;      // calcula pausa
-      delay(pausa);         // demora con valor de pausa
-      noTone(BUZZER_PASIVO);        // detiene reproduccion de tono
-
-      tft.setFont();
-      pagina++;
-
-      if(pagina > 4){
-      pagina=0;
-      }
-
-      if(pagina == 4 || pagina == 0){
-        tft.fillScreen(ST7735_BLACK);
-      }
-    }
-      
-  }else if(digitalRead(PULSADOR2) == LOW){     // si se ha presionado el pulsador
-      for (int i = 0; i < 1; i++) {     // bucle repite 1 veces
-      int duracion = 1000 / duraciones[i];    // duracion de la nota en milisegundos
-      tone(BUZZER_PASIVO, NOTE_C7, duracion);  // ejecuta el tono con la duracion
-      int pausa = duracion * 1.30;      // calcula pausa
-      delay(pausa);         // demora con valor de pausa
-      noTone(BUZZER_PASIVO);        // detiene reproduccion de tono
-
-      tft.setFont();
-      pagina--;
-
-      if(pagina < 0){
-      pagina=4;
-      }
-
-      if(pagina == 4 || pagina == 3){
-        tft.fillScreen(ST7735_BLACK);
-      }
-    }
-  }
-  
-  
-  */
   
 }
 
@@ -528,8 +467,6 @@ void PWM() {
   pwmWrite(mosfetPWM, duty);
   duty = (255 / 100) * dutyPag;
 
-
-
 /*
   if(paginaPWM == true && pagina == 4){
 
@@ -663,18 +600,6 @@ void PWM() {
 
   tft.setCursor(148, 52);  // posicion (x,y)
   tft.println("Hz");
-
-  
-
-/*
-
-  tft.setCursor(10, 45);  // posicion (x,y)
-  tft.println("|");
-
-  tft.setCursor(60, 95);  // posicion (x,y)
-  tft.println("|");
-
-*/
 
 }
 
