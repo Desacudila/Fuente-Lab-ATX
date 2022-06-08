@@ -67,8 +67,7 @@ int duraciones[] = {    // array con la duracion de cada nota
 int pagina = 0;
 
 const int SHORT_PRESS_TIME  = 1000; // 1000 milliseconds
-const int MID_PRESS_TIME  = 1000;
-const int LONG_PRESS_TIME   = 2000; // 1000 milliseconds
+const int LONG_PRESS_TIME   = 1000; // 1000 milliseconds
 
 int lastState = LOW;  // the previous state from the input pin
 int currentState;     // the current reading from the input pin
@@ -88,24 +87,9 @@ bool isLongDetected1 = false;
 
 ////////////////////////////////////////////////////////////////
 
-int lastState2 = LOW;  // the previous state from the input pin
-int currentState2;     // the current reading from the input pin
-unsigned long pressedTime2  = 0;
-unsigned long releasedTime2 = 0;
-bool isPressing2 = false;
-bool isLongDetected2 = false;
-
-////////////////////////////////////////////////////////////////
-
-int lastState3 = LOW;  // the previous state from the input pin
-int currentState3;     // the current reading from the input pin
-unsigned long pressedTime3  = 0;
-unsigned long releasedTime3 = 0;
-bool isPressing3 = false;
-bool isLongDetected3 = false;
-
 bool btBool1 = false;
 bool btBool2 = false;
+bool btBool3 = true;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //      |VARIABLES GRAFICADORAS|
@@ -129,9 +113,9 @@ int vdecimal = 0;
 float iva;
 float sens;
 
-int frecuencia  = 1;
-int duty = 1;
-int dutyPag = 1;
+float frecuencia  = 0;
+float duty = 0;
+float dutyPag = 0;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //      |FUNCIONES GENERALES|
@@ -213,143 +197,24 @@ void temperatura() {
   }
   
     if(temperature < 10){
-    tft.setCursor(134, 117);
+    tft.setCursor(134, 119);
     tft.print(" ");
   }else if(temperature < 100){
-    tft.setCursor(128, 117);
+    tft.setCursor(128, 119);
     tft.print(" ");
   }
   
     tft.setTextColor(ST7735_WHITE, warnColor);
     tft.setTextSize(1);
-    tft.setCursor(cursorA, 117);
+    tft.setCursor(cursorA, 119);
     tft.println(temperature, 0);
-    tft.setCursor(145, 117);
+    tft.setCursor(145, 119);
     tft.println(" C");
-
-    tft.setCursor(115, 117);
-    tft.println(pagina);
-
-    delay(10);
   }
 
 void pulsadores() {
 
-  currentState1 = digitalRead(PULSADOR1);
-  currentState = digitalRead(PULSADOR2);
-
-  if(btBool1 == true && btBool2 == true){
-
-    if(lastState2 == HIGH && currentState2 == LOW) {        // button is pressed
-    pressedTime2 = millis();
-    isPressing2 = true;
-    isLongDetected2 = false;
-  } else if(lastState2 == LOW && currentState2 == HIGH) { // button is released
-    isPressing2 = false;
-    releasedTime2 = millis();
-
-    long pressDuration2 = releasedTime2 - pressedTime2;
-
-    if( pressDuration2 < SHORT_PRESS_TIME )
-      Serial.println("A short press is detected");
-      frecuencia++;
-      if(frecuencia > 99) {frecuencia = 1;}
-  }
-
-  if(isPressing2 == true) {
-    long pressDuration2 = millis() - pressedTime2;
-
-    if( pressDuration2 > MID_PRESS_TIME &&  pressDuration2 < LONG_PRESS_TIME && pagina == 4 ){
-      Serial.println("A Mid press is detected");
-      btBool1 = false;
-    }
-    
-    if( pressDuration2 > LONG_PRESS_TIME ){
-      Serial.println("A long press is detected");
-      frecuencia++;
-      if(frecuencia > 99) {frecuencia = 1;}
-    }
-  }
-
-  lastState2 = currentState2;
-
-  ////////////////////////////////////////////////////////////////////////
-
-  if(lastState3 == HIGH && currentState3 == LOW) {        // button is pressed
-    pressedTime3 = millis();
-    isPressing3 = true;
-    isLongDetected3 = false;
-  } else if(lastState3 == LOW && currentState3 == HIGH) { // button is released
-    isPressing3 = false;
-    releasedTime3 = millis();
-
-    long pressDuration3 = releasedTime3 - pressedTime3;
-
-    if( pressDuration3 < SHORT_PRESS_TIME )
-      Serial.println("A short press is detected");
-      frecuencia--;
-      if(frecuencia < 1) {frecuencia = 99;}
-  }
-
-  if(isPressing3 == true) {
-    long pressDuration3 = millis() - pressedTime3;
-
-    if( pressDuration3 > MID_PRESS_TIME &&  pressDuration3 < LONG_PRESS_TIME){
-      Serial.println("A Mid press is detected");
-      btBool2 = false;
-    }
-
-    if( pressDuration3 > LONG_PRESS_TIME ){
-      Serial.println("A long press is detected");
-      frecuencia--;
-      if(frecuencia < 1) {frecuencia = 99;}
-    }
-  }
-
-  lastState3 = currentState3;
-
-  }else{
-
-  if(lastState1 == HIGH && currentState1 == LOW) {        // button is pressed
-    pressedTime1 = millis();
-    isPressing1 = true;
-    isLongDetected1 = false;
-  } else if(lastState1 == LOW && currentState1 == HIGH) { // button is released
-    isPressing1 = false;
-    releasedTime1 = millis();
-
-    long pressDuration1 = releasedTime1 - pressedTime1;
-
-    if( pressDuration1 < SHORT_PRESS_TIME )
-      Serial.println("A short press is detected");
-      pagina++;
-      tft.fillScreen(ST7735_BLACK);
-      if(pagina > 4)pagina  = 0;
-      //if(pagina == 4 || pagina == 0)  tft.fillScreen(ST7735_BLACK);
-  }
-
-  if(isPressing1 == true) {
-    long pressDuration1 = millis() - pressedTime1;
-
-    if( pressDuration1 > MID_PRESS_TIME &&  pressDuration1 < LONG_PRESS_TIME && pagina == 4 ){
-      Serial.println("A Mid press is detected");
-      btBool1 = true;
-    }
-    
-    if( pressDuration1 > LONG_PRESS_TIME ){
-      Serial.println("A long press is detected");
-      pagina++;
-      tft.fillScreen(ST7735_BLACK);
-      if(pagina > 4)  pagina=0;
-      //if(pagina == 4 || pagina == 0)  tft.fillScreen(ST7735_BLACK);
-    }
-  }
-
-  lastState1 = currentState1;
-
-  ////////////////////////////////////////////////////////////////////////
-
-  currentState = digitalRead(PULSADOR2);
+  currentState = digitalRead(PULSADOR1);
 
   if(lastState == HIGH && currentState == LOW) {        // button is pressed
     pressedTime = millis();
@@ -362,33 +227,99 @@ void pulsadores() {
     long pressDuration = releasedTime - pressedTime;
 
     if( pressDuration < SHORT_PRESS_TIME )
-      Serial.println("A short press is detected");
-      pagina--;
+      btBool3 = true;
+      
+      if(frecuencia == 10 || frecuencia == 100){
+        tft.setTextSize(2);
+        tft.setCursor(105, 45);
+        tft.println("    ");
+      }
+      
+      if(dutyPag == 10 || dutyPag == 100){
+        tft.setTextSize(2);
+        tft.setCursor(105, 75);
+        tft.println("     ");
+      }
+      
+      if(btBool1 == true){
+        if(btBool2 == true){
+          dutyPag++;
+        }else{
+          frecuencia++;
+        }
+      }else{
+      pagina++;
       tft.fillScreen(ST7735_BLACK);
-      if(pagina < 0)  pagina=4;
-      //if(pagina == 4 || pagina == 3)  tft.fillScreen(ST7735_BLACK);
+      if(pagina > 4)pagina  = 0;
+     }
   }
 
-  if(isPressing == true) {
-    long pressDuration1 = millis() - pressedTime;
+  if(isPressing == true && isLongDetected == false) {
+    long pressDuration = millis() - pressedTime;
 
-    if( pressDuration1 > MID_PRESS_TIME &&  pressDuration1 < LONG_PRESS_TIME){
-      Serial.println("A Mid press is detected");
-      btBool2 = true;
-    }
-
-    if( pressDuration1 > LONG_PRESS_TIME ){
-      Serial.println("A long press is detected");
-      pagina--;
-      tft.fillScreen(ST7735_BLACK);
-      if(pagina < 0)  pagina=4;
-      //if(pagina == 4 || pagina == 3)tft.fillScreen(ST7735_BLACK);
+    if( pressDuration > LONG_PRESS_TIME && pagina == 4){
+      btBool3 = true;
+      btBool2 = !btBool2;
+      isLongDetected = true;
     }
   }
-
+  
   lastState = currentState;
 
+  ////////////////////////////////////////////////////////////////////////
+
+  currentState1 = digitalRead(PULSADOR2);
+
+  if(lastState1 == HIGH && currentState1 == LOW) {        // button is pressed
+    pressedTime1 = millis();
+    isPressing1 = true;
+    isLongDetected1 = false;
+  } else if(lastState1 == LOW && currentState1 == HIGH) { // button is released
+    isPressing1 = false;
+    releasedTime1 = millis();
+
+    long pressDuration1 = releasedTime1 - pressedTime1;
+
+    if( pressDuration1 < SHORT_PRESS_TIME )
+      btBool3 = true;
+      
+      if(frecuencia == 10 || frecuencia == 100){
+        tft.setTextSize(2);
+        tft.setCursor(105, 45);
+        tft.println("    ");
+      }
+      
+      if(dutyPag == 10 || dutyPag == 100){
+        tft.setTextSize(2);
+        tft.setCursor(105, 75);
+        tft.println("     ");
+      }
+      
+      if(btBool1 == true){
+        if(btBool2 == true){
+          dutyPag--;
+        }else{
+          frecuencia--;
+        }
+      }else{
+      pagina--;
+      tft.fillScreen(ST7735_BLACK);
+      if(pagina < 0)  pagina = 4;
+     }
   }
+
+  if(isPressing1 == true && isLongDetected1 == false) {
+    long pressDuration1 = millis() - pressedTime1;
+
+    if( pressDuration1 > LONG_PRESS_TIME && pagina == 4){
+      btBool3 = true;
+      btBool1 = !btBool1;
+      isLongDetected1 = true;
+    }
+  }
+  
+  lastState1 = currentState1;
+ 
 }
 
 void recuadrosWT() {
@@ -399,23 +330,23 @@ void recuadrosWT() {
   float scre = 0;
   scre = 110/voltajefinal;
 
-    tft.drawRect(106, 9, 9, 85, ST7735_WHITE); //recuadros blancos
-    tft.drawRect(125, 9, 9, 85, ST7735_WHITE);
-    tft.drawRect(144, 9, 9, 85, ST7735_WHITE);
+    tft.drawRect(108, 9, 9, 85, ST7735_WHITE); //recuadros blancos
+    tft.drawRect(127, 9, 9, 85, ST7735_WHITE);
+    tft.drawRect(146, 9, 9, 85, ST7735_WHITE);
 
     tft.setFont();
     
-    tft.setCursor(108, 99);
+    tft.setCursor(110, 99);
     tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
     tft.setTextSize(1);
     tft.println("V");
     
-    tft.setCursor(127, 99);
+    tft.setCursor(129, 99);
     tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
     tft.setTextSize(1);
     tft.println("I");
     
-    tft.setCursor(146, 99);
+    tft.setCursor(148, 99);
     tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
     tft.setTextSize(1);
     tft.println("P");
@@ -431,8 +362,8 @@ void graficoV(){
   if(grafico2 > 90)grafico2 = 1;
   else  grafico2 = graficoMax - grafico1;
 
-  tft.fillRect(107, 92, 7, -grafico1, ST7735_RED);
-  tft.fillRect(107, 10, 7, grafico2, ST7735_BLACK);
+  tft.fillRect(109, 92, 7, -grafico1, ST7735_RED);
+  tft.fillRect(109, 10, 7, grafico2, ST7735_BLACK);
 
 }
 
@@ -445,8 +376,8 @@ void graficoA(){
   if(grafico2 > 90)grafico2 = 1;
   else  grafico2 = graficoMax - grafico1;
 
-  tft.fillRect(126, 92, 7, -grafico1, ST7735_RED);
-  tft.fillRect(126, 10, 7, grafico2, ST7735_BLACK);
+  tft.fillRect(128, 92, 7, -grafico1, ST7735_RED);
+  tft.fillRect(128, 10, 7, grafico2, ST7735_BLACK);
 
 }
 
@@ -459,8 +390,8 @@ void graficoP(){
   if(grafico2 > 90)grafico2 = 1;
   else  grafico2 = graficoMax - grafico1;
 
-  tft.fillRect(145, 92, 7, -grafico1, ST7735_RED);
-  tft.fillRect(145, 10, 7, grafico2, ST7735_BLACK);
+  tft.fillRect(147, 92, 7, -grafico1, ST7735_RED);
+  tft.fillRect(147, 10, 7, grafico2, ST7735_BLACK);
   
   }
 
@@ -470,7 +401,7 @@ void logo(){
 
     tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
     tft.setRotation(1);
-    tft.setCursor(5, 123);
+    tft.setCursor(5, 125);
     tft.setTextSize(1);
     tft.print("Desa Industries");
 }
@@ -552,6 +483,8 @@ void corrienteCalculo(){
   tft.setTextWrap(true);
   tft.setTextColor(ST7735_WHITE, warnColor);
   tft.setTextSize(2);
+
+  tft.drawRoundRect(5, 40, 98, 24, 5, ST7735_WHITE);
     
   Idc=inte; //Idc=calculoCorriente(cantidad de muestras)
   tft.setCursor(40, 45);  // posicion (x,y)
@@ -565,144 +498,136 @@ void corrienteCalculo(){
 }
 
 void PWM() {
-
+  
   SetPinFrequency(mosfetPWM, frecuencia);
   pwmWrite(mosfetPWM, duty);
-  duty = (255 / 100) * dutyPag;
+  
+  duty = 2.55 * dutyPag;
 
-/*
-  if(paginaPWM == true && pagina == 4){
+  if(frecuencia > 100)frecuencia  = 0;
+  if(frecuencia < 0)  frecuencia  = 100;
+  if(dutyPag > 100)   dutyPag  = 0;
+  if(dutyPag < 0)     dutyPag  = 100;
 
-  currentState2 = digitalRead(PULSADOR1);
+  int sum = 0;                    // suma de muestras hechas
+  unsigned char sample_count = 0; // numero de la muestra
+  int vvca;
 
-  if(lastState2 == HIGH && currentState2 == LOW) {        // button is pressed
-    pressedTime2 = millis();
-    isPressing2 = true;
-    isLongDetected2 = false;
-   
-  } else if(lastState2 == LOW && currentState2 == HIGH) { // button is released
-    isPressing2 = false;
-    releasedTime2 = millis();
-
-    long pressDuration2 = releasedTime2 - pressedTime2;
-
-    if( pressDuration2 < SHORT_PRESS_TIME )
-      pagina++;
-      if(pagina > 4)  pagina = 0;
-      if(pagina == 4 || pagina == 0)  tft.fillScreen(ST7735_BLACK);
-  }
-
-  if(isPressing2 == true && isLongDetected2 == false) {
-    long pressDuration2 = millis() - pressedTime2;
-
-    if( pressDuration2 > LONG_PRESS_TIME ) {
-      pagina++;
-      if(pagina > 4)  pagina = 0;
-      if(pagina == 4 || pagina == 0)  tft.fillScreen(ST7735_BLACK);
-    }
+  if(pagina == 4){
+    vvca = A4;
+    voltajefinal = (voltaje / 0.09082); //(voltaje) / (R2 / (R2 + R1)) salida regulable
   }
   
-  lastState2 = currentState2;
-
-  currentState3 = digitalRead(PULSADOR2);
-
-  if(lastState3 == HIGH && currentState3 == LOW) {        // button is pressed
-    pressedTime3 = millis();
-    isPressing3 = true;
-    isLongDetected3 = false;
-    
-  } else if(lastState3 == LOW && currentState3 == HIGH) { // button is released
-    isPressing3 = false;
-    releasedTime3 = millis();
-
-    long pressDuration3 = releasedTime3 - pressedTime3;
-
-    if( pressDuration3 < SHORT_PRESS_TIME1 )
-      pagina--;
-      if(pagina < 0)  pagina=4;
-      if(pagina == 4 || pagina == 3)  tft.fillScreen(ST7735_BLACK);
+     while (sample_count < NUM_SAMPLES) {
+        sum += analogRead(vvca);
+        sample_count++;
     }
 
-  if(isPressing3 == true && isLongDetected3 == false) {
-    long pressDuration3 = millis() - pressedTime3;
+    voltaje = ((float)sum / (float)NUM_SAMPLES * V5) / 1023.0; //voltaje = ((float)sum / (float)NUM_SAMPLES * voltaje de tu arduino) / 1024.0;
+ 
+    sample_count = 0;
+    sum = 0;
 
-    if( pressDuration3 > LONG_PRESS_TIME2 ) {
-      pagina--;
-      if(pagina < 0)  pagina=4;
-      if(pagina == 4 || pagina == 3)  tft.fillScreen(ST7735_BLACK);
-    }
-  }
-
-  lastState3 = currentState3;
-    
-  }
-
-*/
+    if(voltajefinal > 99.999) {         //ajustar decimales segun escala
+      vdecimal = 0;
+    }else if(voltajefinal > 9.999){
+      vdecimal = 1;
+    }else{
+      vdecimal = 2;
+      }
 
   tft.setRotation(1);
   tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
   tft.setTextWrap(true);
   tft.setTextSize(2);
   tft.setFont();
-  
-  tft.setCursor(10, 10);
+
+  tft.drawRoundRect(10, 10, 44, 24, 5, ST7735_WHITE);
+  tft.setCursor(15, 15);
   tft.println("PWM");
 
-  tft.setCursor(70, 10);  // posicion (x,y)
+  tft.drawRoundRect(70, 10, 85, 24, 5, ST7735_WHITE);
+  tft.setCursor(75, 15);  // posicion (x,y)
   tft.println("V:");
     
   char string[10];
-  tft.setCursor(100, 10);  // posicion (x,y)
+  tft.setCursor(105, 15);  // posicion (x,y)
   dtostrf(voltajefinal, 2, 4, string); //declara como string el valor en memoria de char
-  tft.println(voltajefinal, vdecimal-1); // imprime texto o valor
+  tft.println(voltajefinal, vdecimal); // imprime texto o valor
 
-  tft.setCursor(70, 45);  // posicion (x,y)
+  tft.drawRoundRect(70, 40, 85, 24, 5, ST7735_WHITE);
+  tft.setCursor(75, 45);  // posicion (x,y)
   tft.println("F:");
 
   char string1[10];
-  tft.setCursor(100, 45);  // posicion (x,y)
+  tft.setCursor(105, 45);  // posicion (x,y)
   dtostrf(frecuencia, 2, 4, string1); //declara como string el valor en memoria de char
-  tft.println(frecuencia); // imprime texto o valor
+  tft.println(frecuencia, 0); // imprime texto o valor
 
-  tft.setCursor(70, 80);  // posicion (x,y)
+  tft.drawRoundRect(70, 70, 85, 24, 5, ST7735_WHITE);
+  tft.setCursor(75, 75);  // posicion (x,y)
   tft.println("D:");
 
   char string2[10];
-  tft.setCursor(100, 80);  // posicion (x,y)
+  tft.setCursor(105, 75);  // posicion (x,y)
   dtostrf(dutyPag, 2, 4, string2); //declara como string el valor en memoria de char
-  tft.println(dutyPag); // imprime texto o valor
+  tft.println(dutyPag, 0); // imprime texto o valor
 
-  tft.setCursor(135, 80);  // posicion (x,y)
+  tft.setCursor(140, 75);  // posicion (x,y)
   tft.println("%");
 
-  /*
+  tft.setTextSize(1);
+  tft.setCursor(141, 52);  // posicion (x,y)
+  tft.println("Hz");
+
+  if(btBool3 == true){
+
+  tft.setTextSize(2);
+
+  tft.setCursor(5, 45);  // posicion (x,y)
+  tft.println("     ");
+  tft.setCursor(5, 50);  // posicion (x,y)
+  tft.println("     ");
+  tft.setCursor(5, 60);  // posicion (x,y)
+  tft.println("     ");
+  tft.setCursor(5, 70);  // posicion (x,y)
+  tft.println("     ");
+  tft.setCursor(5, 80);  // posicion (x,y)
+  tft.println("     ");
+  tft.setCursor(5, 90);  // posicion (x,y)
+  tft.println("     ");
+
 
   for(int i = 1; i <= 5; i++) {
 
-  tft.drawRect(10 * i, 45, 11, 11, ST7735_WHITE);
-  tft.drawRect(10 * i, 55, 11, 11, ST7735_WHITE);
-  tft.drawRect(10 * i, 65, 11, 11, ST7735_WHITE);
-  tft.drawRect(10 * i, 75, 11, 11, ST7735_WHITE);
-  tft.drawRect(10 * i, 85, 11, 11, ST7735_WHITE);
+  tft.drawRect(10 * i, 43, 11, 11, ST7735_RED);
+  tft.drawRect(10 * i, 53, 11, 11, ST7735_RED);
+  tft.drawRect(10 * i, 63, 11, 11, ST7735_RED);
+  tft.drawRect(10 * i, 73, 11, 11, ST7735_RED);
+  tft.drawRect(10 * i, 83, 11, 11, ST7735_RED);
 
   }
-  
-  */
+
+  btBool3 = false;
+
+  }
+
+  if(dutyPag == 0){
+    tft.drawLine(20, 83, 50, 83, ST7735_GREEN);
+  }else if(dutyPag == 100){
+    tft.drawLine(20, 53, 50, 53, ST7735_GREEN);
+  }else{
 
   int dLine =  20 + (0.3 * dutyPag);
-
-  tft.drawLine(10, 85, 20, 85, ST7735_GREEN);
-  tft.drawLine(50, 85, 60, 85, ST7735_GREEN);
-  tft.drawLine(20, 85, 20, 55, ST7735_GREEN);
   
-  tft.drawLine(20, 55, dLine, 55, ST7735_GREEN);
-  tft.drawLine(dLine, 55, dLine, 85, ST7735_GREEN);
-  tft.drawLine(dLine, 85, 50, 85, ST7735_GREEN);
+  tft.drawLine(20, 83, 20, 53, ST7735_GREEN);
+  tft.drawLine(50, 83, 50, 53, ST7735_GREEN);
   
-  tft.setTextSize(1);
-
-  tft.setCursor(148, 52);  // posicion (x,y)
-  tft.println("Hz");
+  tft.drawLine(20, 53, dLine, 53, ST7735_GREEN);
+  tft.drawLine(dLine, 53, dLine, 83, ST7735_GREEN);
+  tft.drawLine(dLine, 83, 50, 83, ST7735_GREEN);
+  
+  }
 
 }
 
@@ -759,13 +684,15 @@ void voltajeFunction(){
   tft.setTextWrap(true);
   tft.setTextColor(ST7735_WHITE, warnColor);
   tft.setTextSize(2);
+  
+  tft.drawRoundRect(5, 10, 98, 24, 5, ST7735_WHITE);
 
   char string[10];
-  tft.setCursor(40, 10);  // posicion (x,y)
+  tft.setCursor(40, 15);  // posicion (x,y)
   dtostrf(voltajefinal, 2, 4, string); //declara como string el valor en memoria de char
   tft.println(voltajefinal, vdecimal); // imprime texto o valor
 
-  tft.setCursor(10, 10);  // posicion (x,y)
+  tft.setCursor(10, 15);  // posicion (x,y)
   tft.println("V:");
   
 }
@@ -799,12 +726,14 @@ void potenciaFunction(){
   tft.setTextColor(ST7735_WHITE, warnColor);
   tft.setTextSize(2);
 
+  tft.drawRoundRect(5, 70, 98, 24, 5, ST7735_WHITE);
+
   char string[10];
-  tft.setCursor(40, 80);  // posicion (x,y)
+  tft.setCursor(40, 75);  // posicion (x,y)
   dtostrf(potencia, 3, 4, string); //declara como string el valor en memoria de char
   tft.println(potencia, pdecimal); // imprime texto o valor
 
-  tft.setCursor(10, 80);  // posicion (x,y)
+  tft.setCursor(10, 75);  // posicion (x,y)
   tft.println("P:");
 
   
