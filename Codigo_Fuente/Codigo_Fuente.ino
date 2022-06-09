@@ -35,7 +35,7 @@
 #define TFT_CS         10   // pin tft
 //                     11   // pin 11 tft
 //                     12   // pin 12 tft
-//                     13   // pin 13 tft
+// SCK                 13   // pin 13 tft
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //      |TFT|
@@ -70,7 +70,7 @@ const int SHORT_PRESS_TIME  = 1000; // 1000 milliseconds
 const int LONG_PRESS_TIME   = 1000; // 1000 milliseconds
 
 int lastState = LOW;  // the previous state from the input pin
-int currentState;     // the current reading from the input pin
+int currentState = LOW;     // the current reading from the input pin
 unsigned long pressedTime  = 0;
 unsigned long releasedTime = 0;
 bool isPressing = false;
@@ -79,7 +79,7 @@ bool isLongDetected = false;
 ////////////////////////////////////////////////////////////////
 
 int lastState1 = LOW;  // the previous state from the input pin
-int currentState1;     // the current reading from the input pin
+int currentState1 = LOW;     // the current reading from the input pin
 unsigned long pressedTime1  = 0;
 unsigned long releasedTime1 = 0;
 bool isPressing1 = false;
@@ -103,7 +103,7 @@ int grafico2 = 0;
 //      |VARIABLES GLOBALES|
 ////////////////////////////////////////////////////////////////////////////////////////
 
-float V5 = 5; //voltaje entre 5v y gnd con cable violeta de la fuente aliemntando el arduino
+float V5 = 5.24; //voltaje entre 5v y gnd con cable violeta de la fuente aliemntando el arduino
 
 float voltaje = 0.0;
 float Idc = 0.0;
@@ -112,6 +112,9 @@ float voltajefinal = 0.0;
 int vdecimal = 0;
 float iva;
 float sens;
+int sum = 0;                    // suma de muestras hechas
+unsigned char sample_count = 0; // numero de la muestra
+int vvca;
 
 float frecuencia  = 0;
 float duty = 0;
@@ -144,7 +147,7 @@ void loop() {
   logo();
   temperatura();
   pulsadores();
-
+  
   if(pagina != 4){
   corrienteCalculo();
   voltajeFunction();
@@ -227,7 +230,10 @@ void pulsadores() {
     long pressDuration = releasedTime - pressedTime;
 
     if( pressDuration < SHORT_PRESS_TIME )
+
+    
       btBool3 = true;
+      sonido2();
       
       if(frecuencia == 10 || frecuencia == 100){
         tft.setTextSize(2);
@@ -258,6 +264,7 @@ void pulsadores() {
     long pressDuration = millis() - pressedTime;
 
     if( pressDuration > LONG_PRESS_TIME && pagina == 4){
+      sonido1();
       btBool3 = true;
       btBool2 = !btBool2;
       isLongDetected = true;
@@ -281,7 +288,10 @@ void pulsadores() {
     long pressDuration1 = releasedTime1 - pressedTime1;
 
     if( pressDuration1 < SHORT_PRESS_TIME )
+
+    
       btBool3 = true;
+      sonido2();
       
       if(frecuencia == 10 || frecuencia == 100){
         tft.setTextSize(2);
@@ -312,6 +322,7 @@ void pulsadores() {
     long pressDuration1 = millis() - pressedTime1;
 
     if( pressDuration1 > LONG_PRESS_TIME && pagina == 4){
+      sonido1();
       btBool3 = true;
       btBool1 = !btBool1;
       isLongDetected1 = true;
@@ -411,6 +422,18 @@ void sonido1(){
     for (int i = 0; i < 3; i++) {     // bucle repite 3 veces
     int duracion = 1000 / duraciones[i];    // duracion de la nota en milisegundos
     tone(BUZZER_PASIVO, melodia[i], duracion);  // ejecuta el tono con la duracion
+    int pausa = duracion * 1.30;      // calcula pausa
+    delay(pausa);         // demora con valor de pausa
+    noTone(BUZZER_PASIVO);        // detiene reproduccion de tono
+    }
+  
+}
+
+void sonido2(){
+
+    for (int i = 0; i < 1; i++) {     // bucle repite 3 veces
+    int duracion = 1000 / duraciones[i];    // duracion de la nota en milisegundos
+    tone(BUZZER_PASIVO, NOTE_C7, duracion);  // ejecuta el tono con la duracion
     int pausa = duracion * 1.30;      // calcula pausa
     delay(pausa);         // demora con valor de pausa
     noTone(BUZZER_PASIVO);        // detiene reproduccion de tono
@@ -633,10 +656,6 @@ void PWM() {
 
 void voltajeFunction(){
 
-  int sum = 0;                    // suma de muestras hechas
-  unsigned char sample_count = 0; // numero de la muestra
-  int vvca;
-
   int warnColor;
 
   tft.setFont();
@@ -660,7 +679,7 @@ void voltajeFunction(){
         sample_count++;
     }
 
-    voltaje = ((float)sum / (float)NUM_SAMPLES * V5) / 1023.0; //voltaje = ((float)sum / (float)NUM_SAMPLES * voltaje de tu arduino) / 1024.0;
+    voltaje = ((float)sum / (float)NUM_SAMPLES * V5) / 1024.0; //voltaje = ((float)sum / (float)NUM_SAMPLES * voltaje de tu arduino) / 1024.0;
  
     sample_count = 0;
     sum = 0;
