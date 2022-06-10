@@ -103,7 +103,7 @@ int grafico2 = 0;
 //      |VARIABLES GLOBALES|
 ////////////////////////////////////////////////////////////////////////////////////////
 
-float V5 = 5.24; //voltaje entre 5v y gnd con cable violeta de la fuente aliemntando el arduino
+float V5 = 4.37; //voltaje entre 5v y gnd con cable violeta de la fuente aliemntando el arduino
 
 float voltaje = 0.0;
 float Idc = 0.0;
@@ -229,9 +229,8 @@ void pulsadores() {
 
     long pressDuration = releasedTime - pressedTime;
 
-    if( pressDuration < SHORT_PRESS_TIME )
+    if( pressDuration < SHORT_PRESS_TIME ) {
 
-    
       btBool3 = true;
       sonido2();
       
@@ -256,8 +255,10 @@ void pulsadores() {
       }else{
       pagina++;
       tft.fillScreen(ST7735_BLACK);
-      if(pagina > 4)pagina  = 0;
-     }
+      if(pagina > 4)pagina  = 0; 
+      }
+     
+    }
   }
 
   if(isPressing == true && isLongDetected == false) {
@@ -270,10 +271,10 @@ void pulsadores() {
       isLongDetected = true;
     }
   }
-  
+
   lastState = currentState;
 
-  ////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
   currentState1 = digitalRead(PULSADOR2);
 
@@ -287,9 +288,8 @@ void pulsadores() {
 
     long pressDuration1 = releasedTime1 - pressedTime1;
 
-    if( pressDuration1 < SHORT_PRESS_TIME )
+    if( pressDuration1 < SHORT_PRESS_TIME ) {
 
-    
       btBool3 = true;
       sonido2();
       
@@ -315,7 +315,9 @@ void pulsadores() {
       pagina--;
       tft.fillScreen(ST7735_BLACK);
       if(pagina < 0)  pagina = 4;
-     }
+      }
+     
+    }
   }
 
   if(isPressing1 == true && isLongDetected1 == false) {
@@ -328,7 +330,7 @@ void pulsadores() {
       isLongDetected1 = true;
     }
   }
-  
+
   lastState1 = currentState1;
  
 }
@@ -665,13 +667,13 @@ void voltajeFunction(){
     voltajefinal = voltaje; // salida de 3.3
   }else if(pagina == 1){
     vvca = A2;
-    voltajefinal = (voltaje / 0.8722); //(voltaje) / (R2 / (R2 + R1)) salida de 5
+    voltajefinal = (voltaje / 0.845); //(voltaje) / (R2 / (R2 + R1)) salida de 5
   }else if(pagina == 2){
     vvca = A3;
     voltajefinal = (voltaje / 0.3190); //(voltaje) / (R2 / (R2 + R1)) salida de 12
   }else if(pagina == 3 || pagina == 4){
     vvca = A4;
-    voltajefinal = (voltaje / 0.09082); //(voltaje) / (R2 / (R2 + R1)) salida regulable
+    voltajefinal = (voltaje / 0.09041); //(voltaje) / (R2 / (R2 + R1)) salida regulable
   }
 
      while (sample_count < NUM_SAMPLES) {
