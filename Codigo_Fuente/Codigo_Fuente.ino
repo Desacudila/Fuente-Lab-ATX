@@ -22,8 +22,8 @@
 //      |PINES|
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#define MOSFET         0    // pin mosfet ventilador
-#define PULSADOR1      1    // pulsador en pin 2 pagina++
+#define MOSFET         15    // pin mosfet ventilador
+#define PULSADOR1      16    // pulsador en pin 2 pagina++
 #define PULSADOR2      2    // pulsador en pin 3 pagina--
 #define mosfetPWM      3    // mosfet controlador PWM
 #define BUZZER_PASIVO  4    // buzzer pasivo en pin 4
