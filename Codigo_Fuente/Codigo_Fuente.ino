@@ -22,8 +22,8 @@
 //      |PINES|
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#define MOSFET         15    // pin mosfet ventilador
-#define PULSADOR1      16    // pulsador en pin 2 pagina++
+#define MOSFET         0    // pin mosfet ventilador
+#define PULSADOR1      1    // pulsador en pin 2 pagina++
 #define PULSADOR2      2    // pulsador en pin 3 pagina--
 #define mosfetPWM      3    // mosfet controlador PWM
 #define BUZZER_PASIVO  4    // buzzer pasivo en pin 4
@@ -103,7 +103,7 @@ int grafico2 = 0;
 //      |VARIABLES GLOBALES|
 ////////////////////////////////////////////////////////////////////////////////////////
 
-float V5 = 4.37; //voltaje entre 5v y gnd con cable violeta de la fuente aliemntando el arduino
+float V5 = 5;//4.36; //voltaje entre 5v y gnd con cable violeta de la fuente aliemntando el arduino
 
 float voltaje = 0.0;
 float Idc = 0.0;
@@ -138,7 +138,6 @@ void setup() {
   pinMode(MOSFET, OUTPUT);
   digitalWrite(MOSFET, LOW);
   
-  pinMode(mosfetPWM, OUTPUT);
   InitTimersSafe();
 }
 
@@ -171,21 +170,13 @@ void temperatura() {
   float warnColor;
   float temperature;
   int SENSOR;   // variable almacena valor leido de entrada analogica A0
-  float TEMPERATURA;  // valor de temperatura en grados centigrados
-  float SUMA;   // valor de la suma de las 5 lecturas de temperatura
   tft.setFont();
 
-  SUMA = 0;         // valor inicial de SUMA en cero
-  for (int i=0; i < 5; i++){      // bucle que repite 5 veces
   SENSOR = analogRead(A5);      // lectura de entrada analogica A0  
-  TEMPERATURA = ((SENSOR * (V5*1000)) / 1023) / 10;// formula para convertir valor leido
+  temperature = ((SENSOR * (V5*1000)) / 1023) / 10;// formula para convertir valor leido
             // de entrada A0 en grados centigrados
-  SUMA = TEMPERATURA + SUMA;      // suma de cada lectura de temperatura
-  }
 
-  temperature = SUMA/5.0;
-
-  if(temperature >= 75){
+  if(temperature >= 50){
     warnColor = ST7735_RED;
     digitalWrite(MOSFET, HIGH);
   }else{
@@ -524,7 +515,7 @@ void corrienteCalculo(){
 
 void PWM() {
   
-  SetPinFrequency(mosfetPWM, frecuencia);
+  SetPinFrequencySafe(mosfetPWM, frecuencia);
   pwmWrite(mosfetPWM, duty);
   
   duty = 2.55 * dutyPag;
