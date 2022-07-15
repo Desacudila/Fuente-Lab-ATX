@@ -22,7 +22,7 @@
 //      |PINES|
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#define MOSFET         0    // pin mosfet ventilador
+#define MOSFET         12    // pin mosfet ventilador
 #define PULSADOR1      1    // pulsador en pin 2 pagina++
 #define PULSADOR2      2    // pulsador en pin 3 pagina--
 #define mosfetPWM      3    // mosfet controlador PWM
@@ -103,7 +103,7 @@ int grafico2 = 0;
 //      |VARIABLES GLOBALES|
 ////////////////////////////////////////////////////////////////////////////////////////
 
-float V5 = 5;//4.36; //voltaje entre 5v y gnd con cable violeta de la fuente aliemntando el arduino
+float V5 = 4.72;//5;//4.36; //voltaje entre 5v y gnd con cable violeta de la fuente aliemntando el arduino
 
 float voltaje = 0.0;
 float Idc = 0.0;
@@ -175,6 +175,8 @@ void temperatura() {
   SENSOR = analogRead(A5);      // lectura de entrada analogica A0  
   temperature = ((SENSOR * (V5*1000)) / 1023) / 10;// formula para convertir valor leido
             // de entrada A0 en grados centigrados
+
+  Serial.println(temperature);
 
   if(temperature >= 50){
     warnColor = ST7735_RED;
